@@ -2,7 +2,7 @@ import Foundation
 import Fluent
 import SQLKit
 
-public struct JobModelMigrate: Migration {
+public struct CreateJobModel: Migration {
     public init() {}
     
     public init(schema: String) {
