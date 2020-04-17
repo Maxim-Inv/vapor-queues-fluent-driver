@@ -11,7 +11,7 @@ public enum QueuesFluentJobState: String, Codable {
 }
 
 extension FieldKey {
-    static var key: Self { "key" }
+    static var queue: Self { "queue" }
     static var data: Self { "data" }
     static var state: Self { "state" }
 
@@ -21,16 +21,16 @@ extension FieldKey {
 }
 
 class JobModel: Model {
-        
+    
     public static var schema = "jobs"
     
     /// The unique Job uuid
     @ID(key: .id)
     var id: UUID?
     
-    /// The Job key
-    @Field(key: .key)
-    var key: String
+    /// The job queue name
+    @Field(key: .queue)
+    var queue: String
     
     /// The Job data
     @Field(key: .data)
@@ -54,9 +54,9 @@ class JobModel: Model {
     
     public required init() {}
 
-    init(id: UUID, key: String, data: JobData) {
+    init(id: UUID, queue: String, data: JobData) {
         self.id = id
-        self.key = key
+        self.queue = queue
         self.data = data
         self.state = .pending
     }

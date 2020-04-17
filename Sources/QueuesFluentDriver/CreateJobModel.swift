@@ -14,7 +14,7 @@ public struct CreateJobModel: Migration {
             .field(.createdAt, .datetime)
             .field(.updatedAt, .datetime)
             .field(.deletedAt, .datetime)
-            .field(.key, .string, .required)
+            .field(.queue, .string, .required)
             .field(.state, .string, .required)
             .field(.data, .json, .required)
             .create()

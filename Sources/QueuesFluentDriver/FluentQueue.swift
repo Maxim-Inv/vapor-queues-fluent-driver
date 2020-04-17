@@ -33,7 +33,7 @@ extension FluentQueue: Queue {
             return db.eventLoop.makeFailedFuture(QueuesFluentError.invalidIdentifier)
         }
 
-        return JobModel(id: uuid, key: key, data: jobData).save(on: db)
+        return JobModel(id: uuid, queue: queueName.string, data: jobData).save(on: db)
     }
     
     func clear(_ id: JobIdentifier) -> EventLoopFuture<Void> {
@@ -47,6 +47,7 @@ extension FluentQueue: Queue {
         // This does the equivalent of a Fluent Softdelete but sets the `state` to `completed`
         return JobModel.query(on: database)
             .filter(\.$id == uuid)
+            .filter(\.$state != QueuesFluentJobState.completed)
             .first()
             .unwrap(or: QueuesFluentError.missingJob(id))
             .flatMap { job in
@@ -87,6 +88,7 @@ extension FluentQueue: Queue {
         
         return JobModel.query(on: db)
             .filter(\.$state == QueuesFluentJobState.pending)
+            .filter(\.$queue == self.queueName.string)
             .sort(\.$createdAt, .ascending)
             .first()
             .flatMap { job -> EventLoopFuture<JobIdentifier?> in
@@ -117,7 +119,7 @@ extension FluentQueue: Queue {
             .filter(\.$state == state)
             
         if let queue = queue {
-            query = query.filter(\.$key == queue)
+            query = query.filter(\.$queue == queue)
         }
 
         return query
