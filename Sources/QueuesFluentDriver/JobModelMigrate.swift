@@ -1,8 +1,7 @@
 import Foundation
 import Fluent
-import SQLKit
 
-public struct JobModelMigrate: Migration {
+public struct CreateJobModel: Migration {
     public init() {}
     
     public init(schema: String) {
@@ -10,25 +9,15 @@ public struct JobModelMigrate: Migration {
     }
     
     public func prepare(on database: Database) -> EventLoopFuture<Void> {
-        let model = FluentQueue.model
         return database.schema(JobModel.schema)
             .id()
-            .field(model.$key.key,               .string,   .required)
-            .field(model.$data.key,              .data,     .required)
-            //.field(model.$data.key,              .json,     .required)
-            .field(model.$state.key,             .string,   .required)
-            .field(model.$createdAt.path.first!, .datetime)
-            .field(model.$updatedAt.path.first!, .datetime)
-            .field(model.$deletedAt.path.first!, .datetime)
+            .field(.createdAt, .datetime)
+            .field(.updatedAt, .datetime)
+            .field(.deletedAt, .datetime)
+            .field(.key, .string, .required)
+            .field(.state, .string, .required)
+            .field(.data, .json, .required)
             .create()
-            .flatMap {
-                // Mysql could lock the entire table if there's no index on the field of the WHERE clause
-                let sqlDb = database as! SQLDatabase
-                return sqlDb.create(index: "i_\(JobModel.schema)_\(model.$state.key)")
-                    .on(JobModel.schema)
-                    .column("\(model.$state.key)")
-                    .run()
-            }
     }
     
     public func revert(on database: Database) -> EventLoopFuture<Void> {
